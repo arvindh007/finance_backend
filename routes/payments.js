@@ -63,10 +63,10 @@ router.post('/', async (req, res) => {
     const payment = new Payment({
         chit_plan_id: req.body.chit_plan_id,
         customer_id: req.body.customer_id,
-        customer_id: req.body.customer_id,
         amount: req.body.amount,
         notes: req.body.notes,
-        payment_date: req.body.payment_date || Date.now()
+        payment_date: req.body.payment_date || Date.now(),
+        collectedBy: req.body.collectedBy || 'Admin' // Default to Admin
     });
 
     try {
@@ -128,6 +128,8 @@ router.get('/pending', async (req, res) => {
 
                 if (pendingAmount > 0) {
                     results.push({
+                        plan_id: plan._id,
+                        customer_id: customer._id,
                         plan_name: plan.name,
                         customer_name: customer.name,
                         phone: customer.phone,
@@ -161,6 +163,18 @@ router.get('/daily/:planId', async (req, res) => {
             chit_plan_id: req.params.planId,
             payment_date: { $gte: start, $lte: end }
         });
+        res.json(payments);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Get all payments for a specific customer
+router.get('/customer/:customerId', async (req, res) => {
+    try {
+        const payments = await Payment.find({ customer_id: req.params.customerId })
+            .populate('chit_plan_id')
+            .sort({ payment_date: -1 });
         res.json(payments);
     } catch (err) {
         res.status(500).json({ message: err.message });
