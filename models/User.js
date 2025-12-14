@@ -6,6 +6,12 @@ const userSchema = new mongoose.Schema({
     email: { type: String, unique: true, sparse: true }, // For admin
     password: { type: String, required: true },
     role: { type: String, enum: ['admin', 'agent'], default: 'agent' },
+    isActive: { type: Boolean, default: true },
+    lastLogin: { type: Date },
+    stats: {
+        totalCollected: { type: Number, default: 0 },
+        activeCustomers: { type: Number, default: 0 }
+    },
     createdAt: { type: Date, default: Date.now }
 });
 

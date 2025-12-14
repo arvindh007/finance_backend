@@ -19,6 +19,7 @@ router.post('/', async (req, res) => {
     const plan = new ChitPlan({
         name: req.body.name,
         amount: req.body.amount,
+        interest_rate: req.body.interest_rate || 0,
         duration_months: req.body.duration_months
     });
 

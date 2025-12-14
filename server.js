@@ -15,6 +15,7 @@ app.use('/api/chits', require('./routes/chits'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/auth', require('./routes/auth'));
 
+
 app.get('/', (req, res) => {
     res.send('Chit Fund API is running');
 });

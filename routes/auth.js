@@ -52,12 +52,76 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid password' });
         }
 
+        // Active Status Check
+        if (user.isActive === false) {
+            return res.status(403).json({ message: 'Account is inactive. Contact Admin.' });
+        }
+
+        // Update Last Login
+        user.lastLogin = Date.now();
+        await user.save();
+
         res.json({
             id: user._id,
             name: user.name,
             role: user.role,
             token: 'mock_token_' + user._id
         });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Update Profile
+router.put('/profile', async (req, res) => {
+    try {
+        const { id, name, phone } = req.body;
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (name) user.name = name;
+        if (phone) user.phone = phone;
+
+        await user.save();
+
+        res.json({
+            id: user._id,
+            name: user.name,
+            role: user.role,
+            phone: user.phone,
+            message: 'Profile updated successfully'
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get All Agents
+router.get('/agents', async (req, res) => {
+    try {
+        const agents = await User.find({ role: 'agent' }).select('-password');
+        res.json(agents);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Toggle Agent Status
+router.put('/agent/:id/status', async (req, res) => {
+    try {
+        const { isActive } = req.body;
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { isActive },
+            { new: true }
+        ).select('-password');
+
+        if (!user) return res.status(404).json({ message: 'Agent not found' });
+
+        res.json(user);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
